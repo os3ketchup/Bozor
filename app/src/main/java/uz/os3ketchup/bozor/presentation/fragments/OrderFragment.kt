@@ -16,6 +16,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import uz.os3ketchup.bozor.R
 import uz.os3ketchup.bozor.data.AmountProduct
+import uz.os3ketchup.bozor.data.OrderProduct
 import uz.os3ketchup.bozor.data.SumProduct
 import uz.os3ketchup.bozor.data.database.MyDatabase
 import uz.os3ketchup.bozor.databinding.FragmentOrderBinding
@@ -98,10 +99,24 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
         binding.ivOrder.setOnClickListener {
             Toast.makeText(requireContext(), "clicked", Toast.LENGTH_SHORT).show()
 
-            val productList = myDatabase.amountProductDao().getAllAmountProducts()
+//            val productList = myDatabase.amountProductDao().getAllAmountProducts()
+//
+//            val sumProduct = SumProduct(sumProduct = 90.0, productList = productList)
+//            myDatabase.sumProductDao().addSumProducts(sumProduct)
 
-            val sumProduct = SumProduct(sumProduct = 90.0, productList = productList)
-            myDatabase.sumProductDao().addSumProducts(sumProduct)
+            myDatabase.amountProductDao().getAllAmountProducts().forEach {
+                val orderProduct = OrderProduct(
+                    category = it.productCategory,
+                    product = it.amountProduct,
+                    unit = it.unitProduct,
+                    sum = (it.priceProduct * it.amountProduct.toInt()),
+                    price = 0.0,
+                    amount = it.amountProduct.toDouble(),
+                    date = ""
+                )
+
+                myDatabase.orderProductDao().addOrderProduct(orderProduct)
+            }
 
 
         }

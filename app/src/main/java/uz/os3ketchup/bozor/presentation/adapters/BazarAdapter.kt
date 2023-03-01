@@ -57,7 +57,7 @@ class BazarAdapter(
                         amountList.addAll(sumProduct.productList)
                     }
                     amountList[position].priceProduct = s.toString().toDouble()
-                    myDatabase.sumProductDao().editListPrice(amountList)
+
 
                 }
 
