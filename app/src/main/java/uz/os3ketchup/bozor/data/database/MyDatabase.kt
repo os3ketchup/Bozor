@@ -16,7 +16,7 @@ abstract class MyDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
     abstract fun amountProductDao(): AmountProductDao
     abstract fun sumProductDao(): SumProductDao
-    abstract fun orderProduct(): OrderProductDao
+    abstract fun orderProductDao(): OrderProductDao
 
     companion object {
         private var instance: MyDatabase? = null
