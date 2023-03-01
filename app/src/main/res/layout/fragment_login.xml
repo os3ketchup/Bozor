@@ -1,14 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginFragment">
+    tools:context=".presentation.fragments.LoginFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <View
+        android:id="@+id/basic_color"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="250dp"
+        android:background="#F9A826"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</FrameLayout>
+    <View
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="-100dp"
+        android:layout_marginEnd="-100dp"
+        android:background="@drawable/shape_circle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:text="Login"
+        android:textColor="@color/white"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toBottomOf="@id/basic_color"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parent_constraint"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="70dp"
+        android:background="@drawable/shape_circle_second"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_login">
+
+        <LinearLayout
+            android:id="@+id/til_phone_number"
+            android:background="@drawable/bg_edit_text"
+            app:layout_constraintBottom_toTopOf="@id/btn_login"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="@id/parent_constraint"
+            app:layout_constraintTop_toTopOf="@id/parent_constraint"
+            app:layout_constraintVertical_chainStyle="packed"
+            android:layout_marginBottom="36dp"
+            android:layout_marginStart="36dp"
+            android:layout_marginEnd="36dp"
+            app:layout_constraintVertical_bias="0.4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="6dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_marginStart="24sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+998"
+                android:textSize="36sp"/>
+            <EditText
+                android:background="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="36sp"
+                android:hint="901234567"
+
+                android:textCursorDrawable="@drawable/cursor_color"
+
+
+
+                android:inputType="phone" >
+            </EditText>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="36dp"
+            android:layout_marginEnd="36dp"
+            android:background="@drawable/shape_circle_button"
+            android:text="Login"
+            android:textSize="24sp"
+            app:backgroundTint="#F9A825"
+            app:layout_constraintBottom_toBottomOf="@id/parent_constraint"
+            app:layout_constraintTop_toBottomOf="@id/til_phone_number"
+            app:layout_constraintVertical_bias="0.6" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

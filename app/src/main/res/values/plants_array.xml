@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="planets_array">
+        <item>kg</item>
+        <item>dona</item>
+        <item>yashik</item>
+        <item>karobka</item>
+        <item>pachka</item>
+        <item>blok</item>
+        <item>bog\'</item>
+    </string-array>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_margin="8dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<androidx.appcompat.widget.SearchView
+    android:id="@+id/search_category"
+    android:background="@drawable/bg_edit_text"
+    app:iconifiedByDefault="false"
+    app:queryHint="Enter category..."
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:searchHintIcon="@drawable/ic_edit"/>
+    <ListView
+        android:id="@+id/lv_category"
+        android:layout_margin="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

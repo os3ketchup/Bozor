@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_edit_text"
+    android:layout_margin="8dp"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/tv_product_name"
+        app:layout_constraintBottom_toBottomOf="@id/tv_product_name"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_product_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Baqlajon"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@id/et_price"
+        app:layout_constraintLeft_toRightOf="@id/checkbox"
+        app:layout_constraintTop_toTopOf="@id/et_price" />
+
+    <EditText
+        android:id="@+id/et_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_edit_text"
+        android:hint="amount"
+        android:gravity="end"
+        android:inputType="numberDecimal"
+        android:padding="16dp"
+        app:layout_constraintRight_toLeftOf="@id/tv_amount"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_amount"
+        android:padding="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5 kg"
+        android:textSize="24sp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/et_price"
+        app:layout_constraintBottom_toBottomOf="@id/et_price"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

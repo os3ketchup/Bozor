@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".presentation.fragments.AboutListFragment">
+
+
+    <TextView
+        android:id="@+id/tv_date_list"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="16dp"
+        android:textSize="24sp"
+        android:textColor="@color/teal_700"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="26.01.2022" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_margin="16dp"
+        tools:listitem="@layout/item_list_product"
+        app:layout_constraintTop_toBottomOf="@id/tv_date_list"
+        app:layout_constraintBottom_toTopOf="@id/tv_total_price"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
+    <TextView
+        android:id="@+id/tv_total_price"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_margin="18dp"
+        android:textSize="24sp"
+        android:textColor="@color/teal_700"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TOTAL PRICE: 560"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

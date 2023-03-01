@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_margin="16dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_edit_text"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/tv_amount_of_product"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5 kg"
+        android:textSize="24sp"
+        android:textColor="@color/black"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+<TextView
+    android:id="@+id/tv_price_product"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    android:text="13.400"
+    android:textSize="24sp"
+    android:textColor="@color/black"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tv_amount_of_product"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:text="15.dec,2023"/>
+    <TextView
+        android:id="@+id/tv_percentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0.12%"
+        android:textSize="24sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/tv_price_product"
+        app:layout_constraintRight_toRightOf="parent"/>
+    <ImageView
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:src="@drawable/increase"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintRight_toLeftOf="@id/tv_percentage"
+        app:layout_constraintTop_toTopOf="@id/tv_percentage"
+        app:layout_constraintBottom_toBottomOf="@id/tv_percentage"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

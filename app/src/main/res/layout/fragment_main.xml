@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".presentation.fragments.MainFragment">
+
+    <Button
+        android:id="@+id/btn_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/shape_circle_button"
+        android:text="BUYURTMA BERISH"
+        android:textSize="24sp"
+        app:backgroundTint="#F9A825" />
+
+    <Button
+        android:id="@+id/btn_orders"
+        android:layout_marginTop="18dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Buyurtmalar"
+        android:textSize="24sp"
+        app:backgroundTint="#F9A825"
+        android:background="@drawable/shape_circle_button"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp"
+
+
+        />
+</LinearLayout>
+
