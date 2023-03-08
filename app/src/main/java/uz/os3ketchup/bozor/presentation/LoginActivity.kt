@@ -25,4 +25,5 @@ class LoginActivity : AppCompatActivity() {
     override fun supportNavigateUpTo(upIntent: Intent) {
         navController.navigateUp()
     }
+
 }

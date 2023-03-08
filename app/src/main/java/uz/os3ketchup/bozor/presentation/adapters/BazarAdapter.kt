@@ -11,34 +11,38 @@ import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 import uz.os3ketchup.bozor.data.AmountList
 import uz.os3ketchup.bozor.data.AmountProduct
+import uz.os3ketchup.bozor.data.OrderProduct
 import uz.os3ketchup.bozor.data.SumProduct
 import uz.os3ketchup.bozor.data.database.MyDatabase
 import uz.os3ketchup.bozor.databinding.ItemListBinding
 
 class BazarAdapter(
     var context: Context,
-    private var list: List<AmountProduct>, private var sumList: List<SumProduct>
+    private var list: List<OrderProduct>
 ) :
     RecyclerView.Adapter<BazarAdapter.VH>() {
 
     var myDatabase = MyDatabase.getInstance(context)
-    var amountList = ArrayList<AmountProduct>()
+
+    //    var amountList = ArrayList<AmountProduct>()
     inner class VH(private var itemRV: ItemListBinding) : ViewHolder(itemRV.root) {
 
         @SuppressLint("SetTextI18n", "CheckResult")
-        fun onBind(amountProduct: AmountProduct, position: Int) {
+        fun onBind(orderProduct: OrderProduct) {
 
-            if (sumList[0].isSelected) {
-                itemRV.checkbox.visibility = View.VISIBLE
-            } else {
-                itemRV.checkbox.visibility = View.INVISIBLE
+            itemRV.etPrice.setText(orderProduct.price.toString())
+            itemRV.tvProductName.text = orderProduct.product
+            itemRV.tvAmount.text = "${orderProduct.amount} ${orderProduct.unit}"
+            itemRV.checkbox.isChecked = orderProduct.isChecked
+            itemRV.checkbox.setOnCheckedChangeListener { _, isChecked ->
+                orderProduct.isChecked = isChecked
+                myDatabase.orderProductDao().editOrderProduct(orderProduct)
             }
 
-            itemRV.etPrice.setText(amountProduct.priceProduct.toString())
-            itemRV.tvProductName.text = amountProduct.productName
-            itemRV.tvAmount.text = "${amountProduct.amountProduct} ${amountProduct.unitProduct}"
 
             itemRV.etPrice.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
@@ -50,29 +54,42 @@ class BazarAdapter(
 
                 }
 
-                @RequiresApi(Build.VERSION_CODES.N)
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-                    myDatabase.sumProductDao().getAllSumProducts().forEach { sumProduct ->
-                        amountList.addAll(sumProduct.productList)
-                    }
-                    amountList[position].priceProduct = s.toString().toDouble()
 
 
                 }
 
                 override fun afterTextChanged(s: Editable?) {
+                    myDatabase.orderProductDao().updateOrderProductPriceByProduct(
+                        product = orderProduct.product,
+                        newPrice = s.toString().toDouble()
+                    )
+
+                    myDatabase.orderProductDao().getAllOrderProduct().forEach {
+                        myDatabase.orderProductDao()
+                            .editOrderProduct(it.copy(sum = it.amount * it.price))
+                    }
 
 
                 }
             })
-
             itemRV.root.setOnLongClickListener {
-                myDatabase.sumProductDao().getAllSumProducts().forEach { sumProduct ->
-                    myDatabase.sumProductDao().editSumProduct(sumProduct.copy(isSelected = true))
+                myDatabase.orderProductDao().getAllOrderProduct().forEach {
+                    myDatabase.orderProductDao().editOrderProduct(it.copy(isLongClicked = true))
                 }
                 true
             }
+
+
+            if (list[0].isLongClicked) {
+                itemRV.checkbox.visibility = View.VISIBLE
+                itemRV.ivIcEdit.visibility = View.INVISIBLE
+
+            } else {
+                itemRV.checkbox.visibility = View.INVISIBLE
+                itemRV.ivIcEdit.visibility = View.VISIBLE
+            }
+
         }
     }
 
@@ -85,7 +102,7 @@ class BazarAdapter(
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        holder.onBind(list[position], position)
+        holder.onBind(list[position])
     }
 
 

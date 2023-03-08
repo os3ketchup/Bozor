@@ -25,5 +25,8 @@ interface AmountProductDao {
     @Query("select * from amountProduct")
     fun getAllAmountProducts(): List<AmountProduct>
 
+    @Query("DELETE FROM AmountProduct")
+    fun clearTable()
+
 
 }

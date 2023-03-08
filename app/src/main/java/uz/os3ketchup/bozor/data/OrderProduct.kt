@@ -13,5 +13,7 @@ data class OrderProduct(
     val amount:Double,
     val date:String,
     val unit:String,
-    val sum:Double
+    val sum:Double,
+    val isLongClicked:Boolean = false,
+    var isChecked:Boolean = false,
 )

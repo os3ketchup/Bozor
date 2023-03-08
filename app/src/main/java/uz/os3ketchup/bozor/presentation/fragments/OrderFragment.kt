@@ -107,7 +107,7 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
             myDatabase.amountProductDao().getAllAmountProducts().forEach {
                 val orderProduct = OrderProduct(
                     category = it.productCategory,
-                    product = it.amountProduct,
+                    product = it.productName,
                     unit = it.unitProduct,
                     sum = (it.priceProduct * it.amountProduct.toInt()),
                     price = 0.0,
@@ -116,6 +116,7 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 )
 
                 myDatabase.orderProductDao().addOrderProduct(orderProduct)
+                myDatabase.amountProductDao().clearTable()
             }
 
 
