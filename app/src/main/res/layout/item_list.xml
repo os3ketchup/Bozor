@@ -27,14 +27,13 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="@id/et_price" />
 
-    <EditText
+    <TextView
         android:id="@+id/et_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="amount"
         android:gravity="end"
         android:textSize="16sp"
-        android:inputType="numberDecimal"
+        android:text="Amount"
         android:padding="16dp"
         app:layout_constraintLeft_toRightOf="@id/tv_product_name"
         app:layout_constraintRight_toLeftOf="@id/tv_amount"

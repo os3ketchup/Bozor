@@ -10,7 +10,7 @@ interface OrderProductDao {
     fun addOrderProduct(orderProduct: OrderProduct)
 
     @Delete
-    fun deleteOrderProduct(){}
+    fun deleteOrderProduct(orderProduct: OrderProduct)
 
     @Query("UPDATE OrderProduct SET price = :newPrice WHERE product = :product")
     fun updateOrderProductPriceByProduct(product:String,newPrice:Double)

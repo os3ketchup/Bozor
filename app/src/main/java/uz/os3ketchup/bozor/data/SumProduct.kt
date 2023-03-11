@@ -10,20 +10,20 @@ import com.google.gson.reflect.TypeToken
 data class SumProduct(
     @PrimaryKey(autoGenerate = true)
     val id: Int? = null,
-    val sumProduct: Double,
-    var isSelected:Boolean = false,
-    var productList: List<AmountProduct>
+    val date: String,
+    var isPassed:Boolean = false,
+    var productList: List<OrderProduct>
 )
 
 class ProductsTypeConverter {
     @TypeConverter
-    fun fromString(value: String?): List<AmountProduct> {
-        val listType = object : TypeToken<List<AmountProduct>>() {}.type
+    fun fromString(value: String?): List<OrderProduct> {
+        val listType = object : TypeToken<List<OrderProduct>>() {}.type
         return Gson().fromJson(value, listType)
     }
 
     @TypeConverter
-    fun fromArrayList(productList: List<AmountProduct>): String {
+    fun fromArrayList(productList: List<OrderProduct>): String {
         return Gson().toJson(productList)
     }
 }

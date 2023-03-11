@@ -43,7 +43,7 @@ class BazarAdapter(
         @SuppressLint("SetTextI18n", "CheckResult")
         fun onBind(orderProduct: OrderProduct) {
 
-            itemRV.etPrice.setText(orderProduct.price.toString())
+            itemRV.etPrice.text = orderProduct.price.toString()
             itemRV.tvProductName.text = orderProduct.product
             itemRV.tvAmount.text = "${orderProduct.amount} ${orderProduct.unit}"
             itemRV.checkbox.isChecked = orderProduct.isChecked
@@ -72,20 +72,21 @@ class BazarAdapter(
                 priceItem.setText(orderProduct.price.toString())
                 amountItem.setText(orderProduct.amount.toString())
                 buttonAccept.setOnClickListener {
-                    val amount = amountItem.text.toString().toDouble()
+                    val amounts = amountItem.text.toString().toDouble()
                     val price = priceItem.text.toString().toDouble()
                     myDatabase.orderProductDao()
-                        .editOrderProduct(
-                            orderProduct.copy(
-                                amount = amount,
-                                price = price,
-                                sum = amount * price
+                        .updateOrderProductPriceByProduct(orderProduct.product, newPrice = price)
+                    myDatabase.orderProductDao().getAllOrderProduct().forEach {
+                        myDatabase.orderProductDao()
+                            .editOrderProduct(
+                                it.copy(
+                                    sum = it.amount * it.price,
+                                    isLongClicked = it.isLongClicked
+                                )
                             )
-                        )
-                    myDatabase.orderProductDao().updateOrderProductPriceByProduct(
-                        product = orderProduct.product,
-                        newPrice = price
-                    )
+                    }
+
+
 
                     dialog.cancel()
                 }
