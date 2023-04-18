@@ -42,9 +42,6 @@ class ProductAddingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         myDatabase = MyDatabase.getInstance(requireContext())
-
-
-
         val listCategory = myDatabase.categoryDao().getAllCategory()
 
         val listCategoryName = ArrayList<String>()
@@ -67,9 +64,10 @@ class ProductAddingFragment : Fragment() {
 
             val listAdapter = ArrayAdapter(
                 requireContext(),
-                androidx.transition.R.layout.support_simple_spinner_dropdown_item, listCategoryName
+                R.layout.list_item_viewer, listCategoryName
 
             )
+            
             listView.adapter = listAdapter
             editText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
@@ -89,9 +87,10 @@ class ProductAddingFragment : Fragment() {
 
                 }
             })
-            listView.setOnItemClickListener { parent, view, position, id ->
+            listView.setOnItemClickListener { _, _, position, _ ->
                 binding.tvCategory.text = listAdapter.getItem(position)
                 binding.tvCategory.text.toString()
+
                 myDatabase.categoryDao().getAllCategory().forEach {
                     if (it.categoryName == binding.tvCategory.text.toString()) {
                         cat = it.categoryId

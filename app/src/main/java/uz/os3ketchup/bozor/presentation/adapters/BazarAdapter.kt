@@ -16,21 +16,21 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.os.bundleOf
+import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import uz.os3ketchup.bozor.R
-import uz.os3ketchup.bozor.data.AmountList
-import uz.os3ketchup.bozor.data.AmountProduct
-import uz.os3ketchup.bozor.data.OrderProduct
-import uz.os3ketchup.bozor.data.SumProduct
+import uz.os3ketchup.bozor.data.*
 import uz.os3ketchup.bozor.data.database.MyDatabase
 import uz.os3ketchup.bozor.databinding.ItemListBinding
 
 class BazarAdapter(
     var context: Context,
-    private var list: List<OrderProduct>
+    private var list: List<OrderProduct>,
+    var navController: NavController
 ) :
     RecyclerView.Adapter<BazarAdapter.VH>() {
 
@@ -62,7 +62,6 @@ class BazarAdapter(
                 )
 //            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-
                 val labelProduct = dialog.findViewById<TextView>(R.id.label_product)
                 val priceItem = dialog.findViewById<EditText>(R.id.et_price_item)
                 val amountItem = dialog.findViewById<EditText>(R.id.et_amount_item)
@@ -75,16 +74,21 @@ class BazarAdapter(
                     val amounts = amountItem.text.toString().toDouble()
                     val price = priceItem.text.toString().toDouble()
                     myDatabase.orderProductDao()
-                        .updateOrderProductPriceByProduct(orderProduct.product, newPrice = price)
+                        .editOrderProduct(
+                            orderProduct.copy(
+                                amount = amounts, sum = price * amounts
+                            )
+                        )
                     myDatabase.orderProductDao().getAllOrderProduct().forEach {
                         myDatabase.orderProductDao()
                             .editOrderProduct(
                                 it.copy(
-                                    sum = it.amount * it.price,
                                     isLongClicked = it.isLongClicked
                                 )
                             )
                     }
+                    myDatabase.orderProductDao()
+                        .updateOrderProductPriceByProduct(orderProduct.product, newPrice = price)
 
 
 
@@ -126,6 +130,13 @@ class BazarAdapter(
                 }
             })
 */
+            itemRV.root.setOnClickListener {
+                navController.navigate(
+                    R.id.infoProductFragment,
+                    bundleOf("product" to orderProduct.product)
+                )
+            }
+
 
             itemRV.root.setOnLongClickListener {
                 myDatabase.orderProductDao().getAllOrderProduct().forEach {
@@ -145,6 +156,11 @@ class BazarAdapter(
             }
 
         }
+    }
+
+    fun setFilteredList(list: List<OrderProduct>) {
+        this.list = list
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {

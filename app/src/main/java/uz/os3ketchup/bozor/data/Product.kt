@@ -18,7 +18,7 @@ data class Product(
     @PrimaryKey(autoGenerate = true)
     val productId: Int? = null,
     var productName: String = "",
-    val productAmount: Double = 0.0,
+    var productAmount: Double = 0.0,
     val productUnit: String = "",
     val categoryId: Int
 )

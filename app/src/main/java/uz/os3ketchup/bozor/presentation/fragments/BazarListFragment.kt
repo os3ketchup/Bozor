@@ -1,28 +1,41 @@
 package uz.os3ketchup.bozor.presentation.fragments
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
+import androidx.room.util.query
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.apache.poi.wp.usermodel.HeaderFooterType
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import uz.os3ketchup.bozor.R
+import uz.os3ketchup.bozor.data.OrderProduct
+import uz.os3ketchup.bozor.data.ProductInfo
+import uz.os3ketchup.bozor.data.SumProduct
 import uz.os3ketchup.bozor.data.database.MyDatabase
 import uz.os3ketchup.bozor.databinding.FragmentBazarListBinding
 import uz.os3ketchup.bozor.presentation.adapters.BazarAdapter
-
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class BazarListFragment : Fragment() {
@@ -30,6 +43,8 @@ class BazarListFragment : Fragment() {
     lateinit var binding: FragmentBazarListBinding
     private lateinit var bazarAdapter: BazarAdapter
     private lateinit var myDatabase: MyDatabase
+    private lateinit var navHostFragment: NavHostFragment
+    private lateinit var navController: NavController
 
 
     override fun onCreateView(
@@ -41,21 +56,77 @@ class BazarListFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("CheckResult", "SetTextI18n")
+    @RequiresApi(Build.VERSION_CODES.O)
+    @SuppressLint("CheckResult", "SetTextI18n", "SimpleDateFormat")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        navHostFragment =
+            requireActivity().supportFragmentManager.findFragmentById(R.id.container_main) as NavHostFragment
+        navController = navHostFragment.navController
+
 
         var totalPrice = 0.0
         var imageResource = 0
 
         myDatabase = MyDatabase.getInstance(requireActivity())
+        binding.svProducts.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
 
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterList(newText)
+                return true
+            }
+        })
+/*
+        val currentDate = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+        val formattedDateTime = currentDate.format(formatter)!!
+        val orderProduct = myDatabase.orderProductDao().getAllOrderProduct()
+*/
+        val currentTime = Date()
 
+// Format the time as a string
+        val formatter = SimpleDateFormat("yyyy, MMMM d")
+        val formattedTime = formatter.format(currentTime)
 
+        binding.ivConfirm.setOnClickListener {
+            myDatabase.orderProductDao().getAllOrderProduct().forEach { it ->
+
+                myDatabase.productDao().getAllProducts().forEach { product ->
+                    if (it.product == product.productName) {
+                        myDatabase.productDao().editProduct(product.copy(productAmount = it.price))
+                    }
+                }
+            }
+            val sumProduct = SumProduct(
+                date = formattedTime,
+                productList = myDatabase.orderProductDao().getAllOrderProduct()
+            )
+            myDatabase.sumProductDao().addSumProducts(sumProduct)
+
+            myDatabase.sumProductDao().getAllSumProducts().forEach {
+                it.productList.forEach { requiredProduct ->
+
+                    val productInfo = ProductInfo(
+                        productName = requiredProduct.product,
+                        productPrice = requiredProduct.price,
+                        productAmount = requiredProduct.amount,
+                        priceDate = it.date
+                    )
+                    myDatabase.productInfoDao().addProductInfo(productInfo)
+                }
+            }
+        }
+
+        binding.fabAddProduct.setOnClickListener {
+            findNavController().navigate(R.id.orderFragment)
+        }
 
         binding.ivShare.setOnClickListener {
-
-
             val targetDoc = createWordDoc()
             addParagraph(targetDoc)
             addTable(targetDoc)
@@ -84,16 +155,14 @@ class BazarListFragment : Fragment() {
                 }
                 binding.tvTotalPrice.text = "Total price: $totalPrice"
 
-                bazarAdapter = BazarAdapter(requireContext(), orderList)
+                bazarAdapter = BazarAdapter(requireContext(), orderList, navController)
                 binding.rvProducts.adapter = bazarAdapter
-
-
 
                 if (imageResource == R.drawable.ic_calendar) {
                     binding.ivAll.setOnClickListener {
-                        Toast.makeText(requireContext(), "calendar", Toast.LENGTH_SHORT).show()
+                        findNavController().navigate(R.id.action_bazarListFragment_to_dateProducts)
                     }
-                } else if (imageResource == R.drawable.ic_all) {
+                } else {
                     binding.ivAll.setOnClickListener {
                         myDatabase.orderProductDao().getAllOrderProduct().forEach {
                             myDatabase.orderProductDao()
@@ -101,10 +170,6 @@ class BazarListFragment : Fragment() {
                         }
                     }
                 }
-
-
-
-
                 binding.ivDelete.setOnClickListener {
                     myDatabase.orderProductDao().getAllOrderProduct().forEach {
                         if (it.isChecked) {
@@ -112,17 +177,6 @@ class BazarListFragment : Fragment() {
                         }
                     }
                 }
-
-
-
-
-
-
-
-
-
-
-
                 if (orderList[0].isLongClicked) {
                     binding.ivClear.visibility = View.VISIBLE
                     binding.fabAddProduct.visibility = View.INVISIBLE
@@ -152,9 +206,22 @@ class BazarListFragment : Fragment() {
 
     }
 
-    private fun readDoc() {
-
+    private fun filterList(newText: String?) {
+        if (newText != null) {
+            val filteredList = ArrayList<OrderProduct>()
+            for (i in myDatabase.orderProductDao().getAllOrderProduct()) {
+                if (i.product.lowercase(Locale.ROOT).contains(newText)) {
+                    filteredList.add(i)
+                }
+            }
+            if (filteredList.isEmpty()) {
+                Toast.makeText(requireContext(), "no data found", Toast.LENGTH_SHORT).show()
+            } else {
+                bazarAdapter.setFilteredList(filteredList)
+            }
+        }
     }
+
 
     private fun saveOurDoc(targetDoc: XWPFDocument): Uri {
         val ourAppFileDirectory = File(requireActivity().filesDir, "files")
@@ -194,7 +261,7 @@ class BazarListFragment : Fragment() {
         headerRun.color = "00ff00"
 
         //initializing the footer
-        val docFooter = targetDoc.createFooter(HeaderFooterType.DEFAULT);
+        val docFooter = targetDoc.createFooter(HeaderFooterType.DEFAULT)
 
         //creating a run for the footer. This sets the footer text and stylings
         val footerRun = docFooter.createParagraph().createRun()
@@ -227,8 +294,7 @@ class BazarListFragment : Fragment() {
 */
 
     private fun createWordDoc(): XWPFDocument {
-        val ourWordDoc = XWPFDocument()
-        return ourWordDoc
+        return XWPFDocument()
 
     }
 

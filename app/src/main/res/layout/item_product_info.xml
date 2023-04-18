@@ -26,6 +26,7 @@
     android:textSize="24sp"
     android:textColor="@color/black"/>
     <TextView
+        android:id="@+id/tv_product_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/tv_amount_of_product"
@@ -43,6 +44,7 @@
         app:layout_constraintTop_toBottomOf="@id/tv_price_product"
         app:layout_constraintRight_toRightOf="parent"/>
     <ImageView
+        android:id="@+id/iv_progress"
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:src="@drawable/increase"

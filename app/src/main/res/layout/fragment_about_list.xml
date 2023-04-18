@@ -19,7 +19,9 @@
         android:layout_height="wrap_content"
         android:text="26.01.2022" />
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_summarize_adapter"
         android:layout_margin="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_list_product"
         app:layout_constraintTop_toBottomOf="@id/tv_date_list"
         app:layout_constraintBottom_toTopOf="@id/tv_total_price"

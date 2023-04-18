@@ -29,10 +29,10 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var dialog: Dialog
     private var selectedCategoryId: Int = 0
     private lateinit var amountProductAdapter: AmountProductAdapter
+    lateinit var amountProduct: AmountProduct
     var productUnits: String = "SASA"
     lateinit var category: String
     lateinit var product: String
-    lateinit var sumProductList: ArrayList<AmountProduct>
 
 
     override fun onCreateView(
@@ -48,6 +48,8 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         myDatabase = MyDatabase.getInstance(requireActivity())
+        var currentPrice = 0.0
+
 
         myDatabase.amountProductDao().getAllAmountProduct().subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread()).subscribe { productList ->
@@ -55,15 +57,35 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 binding.rvAmounts.adapter = amountProductAdapter
             }
 
-        binding.btnSave.setOnClickListener {
-            val amountProduct = AmountProduct(
-                productCategory = binding.tvPart.text.toString(),
-                productName = binding.tvNameOfProduct.text.toString(),
-                amountProduct = binding.etAmount.text.toString(),
-                unitProduct = productUnits
-            )
-            myDatabase.amountProductDao().addAmountProduct(amountProduct)
 
+        binding.btnSave.setOnClickListener {
+
+
+            if (binding.tvPart.text.toString()
+                    .isNotEmpty() && binding.tvNameOfProduct.text.toString()
+                    .isNotEmpty() && binding.etAmount.text.toString().isNotEmpty()
+            ) {
+                myDatabase.productDao().getAllProducts().forEach {
+                    if (binding.tvNameOfProduct.text.toString()== it.productName){
+                         amountProduct = AmountProduct(
+                            productCategory = binding.tvPart.text.toString(),
+                            productName = binding.tvNameOfProduct.text.toString(),
+                            amountProduct = binding.etAmount.text.toString(),
+                            unitProduct = productUnits,
+                            priceProduct = it.productAmount
+                        )
+                    }
+                }
+
+
+                myDatabase.amountProductDao().addAmountProduct(amountProduct)
+                binding.tvPart.text = ""
+                binding.tvNameOfProduct.text = ""
+                binding.etAmount.text.clear()
+            } else {
+                Toast.makeText(requireContext(), "please fill whole gaps", Toast.LENGTH_SHORT)
+                    .show()
+            }
 
         }
 
@@ -105,12 +127,13 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
 //            myDatabase.sumProductDao().addSumProducts(sumProduct)
 
             myDatabase.amountProductDao().getAllAmountProducts().forEach {
+
                 val orderProduct = OrderProduct(
                     category = it.productCategory,
                     product = it.productName,
                     unit = it.unitProduct,
                     sum = (it.priceProduct * it.amountProduct.toInt()),
-                    price = 0.0,
+                    price = it.priceProduct,
                     amount = it.amountProduct.toDouble(),
                     date = ""
                 )
@@ -121,7 +144,7 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
 
         }
-
+/*support_simple_spinner_dropdown_item*/
         binding.tvPart.setOnClickListener {
             dialog = Dialog(requireContext())
             dialog.setContentView(R.layout.dialog_particular_product)
@@ -156,18 +179,22 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
             listView.setOnItemClickListener { _, _, position, _ ->
                 binding.tvPart.text = listAdapter.getItem(position)
                 binding.tvPart.text.toString()
+                Toast.makeText(requireContext(), "$position", Toast.LENGTH_SHORT).show()
                 category = listAdapter.getItem(position).toString()
                 myDatabase.categoryDao().getAllCategory().forEach {
                     if (it.categoryName == binding.tvPart.text.toString()) {
                         selectedCategoryId = it.categoryId!!
 
-                        myDatabase.productDao().getAllProducts().forEach { product ->
-                            if (product.categoryId == selectedCategoryId) {
-                                productNameList.add(product.productName)
-                            }
-                        }
+
                     }
                 }
+                productNameList.clear()
+                myDatabase.productDao().getAllProducts().forEach { product ->
+                    if (product.categoryId == selectedCategoryId) {
+                        productNameList.add(product.productName)
+                    }
+                }
+                binding.tvNameOfProduct.text = ""
                 dialog.dismiss()
 
             }
@@ -211,6 +238,7 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
             })
 
             listView.setOnItemClickListener { _, _, position, _ ->
+
                 binding.tvNameOfProduct.text = listAdapter.getItem(position)
                 product = listAdapter.getItem(position).toString()
                 dialog.dismiss()

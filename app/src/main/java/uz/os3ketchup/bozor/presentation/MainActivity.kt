@@ -38,23 +38,26 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            // get reference to the Room database
-
-
-            // change the value of the variable to false
-
-            myDatabase.orderProductDao().getAllOrderProduct().forEach {
-                myDatabase.orderProductDao()
-                    .editOrderProduct(it.copy(isLongClicked = false, isChecked = false))
-            }
-
-
-            // pop the fragment from the back stack
-            supportFragmentManager.popBackStack()
-            return true
-        }
-        return super.onKeyDown(keyCode, event)
-    }
 }
+
+/*
+override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
+        // get reference to the Room database
+
+
+        // change the value of the variable to false
+
+        myDatabase.orderProductDao().getAllOrderProduct().forEach {
+            myDatabase.orderProductDao()
+                .editOrderProduct(it.copy(isLongClicked = false, isChecked = false))
+        }
+
+
+        // pop the fragment from the back stack
+        supportFragmentManager.popBackStack()
+        return true
+    }
+    return super.onKeyDown(keyCode, event)
+}
+*/
