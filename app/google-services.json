@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "909294614624",
+    "firebase_url": "https://bozor-748b9-default-rtdb.firebaseio.com",
     "project_id": "bozor-748b9",
     "storage_bucket": "bozor-748b9.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "909294614624-1ki6bqmu2db5v7ictoj8j26hk0ip1ani.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uz.os3ketchup.bozor",
+            "certificate_hash": "d5c085e72c1d29c0dee29de7e6f5a0abcb799d06"
+          }
+        },
         {
           "client_id": "909294614624-47sj5fbab6d6bnhhk16tl3vtpib60jmf.apps.googleusercontent.com",
           "client_type": 3

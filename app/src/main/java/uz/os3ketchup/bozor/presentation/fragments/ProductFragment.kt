@@ -47,6 +47,11 @@ class ProductFragment : Fragment() {
     @SuppressLint("CheckResult")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
         myDatabase = MyDatabase.getInstance(requireContext())
         list = ArrayList()
 
@@ -56,10 +61,6 @@ class ProductFragment : Fragment() {
                 binding.rvProducts.adapter = productAdapter
             }
 
-        /*   binding.ivAdd.setOnClickListener {
-               findNavController().navigate(R.id.productAddingFragment)
-           }*/
-        ///////
 
         val listCategory = myDatabase.categoryDao().getAllCategory()
 
@@ -119,15 +120,16 @@ class ProductFragment : Fragment() {
 
         }
         binding.btnSave.setOnClickListener {
-            if (binding.tvCategory.text.isNotEmpty() && binding.etProduct.text.isNotEmpty()){
+            if (binding.tvCategory.text.isNotEmpty() && binding.etProduct.text.isNotEmpty()) {
                 val productName = binding.etProduct.text.toString().trim()
                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
                 val product = Product(productName = productName, categoryId = cat!!)
 
                 myDatabase.productDao().addProduct(product)
                 binding.etProduct.text.clear()
-            }else{
-                Toast.makeText(requireContext(), "please fill empty gaps", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "please fill empty gaps", Toast.LENGTH_SHORT)
+                    .show()
             }
 
 

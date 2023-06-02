@@ -2,6 +2,15 @@
 # You can control the set of applied configuration files using the
 # proguardFiles setting in build.gradle.
 #
+   # Add this global rule
+    -keepattributes Signature
+
+    # This rule will properly ProGuard all the model classes in
+    # the package com.yourcompany.models.
+    # Modify this rule to fit the structure of your app.
+    -keepclassmembers class com.yourcompany.models.** {
+      *;
+    }
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 

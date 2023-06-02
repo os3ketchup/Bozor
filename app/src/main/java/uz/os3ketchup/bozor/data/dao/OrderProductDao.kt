@@ -12,10 +12,10 @@ interface OrderProductDao {
     @Delete
     fun deleteOrderProduct(orderProduct: OrderProduct)
 
-    @Query("UPDATE OrderProduct SET price = :newPrice WHERE product = :product")
+    @Query("UPDATE OrderProduct SET price = :newPrice, sum = :newPrice * amount WHERE product = :product")
+
+    //UPDATE OrderProduct SET price = :newPrice WHERE product = :product
     fun updateOrderProductPriceByProduct(product:String,newPrice:Double)
-
-
 
     @Query("SELECT * FROM OrderProduct")
     fun getAllOrderProduct():List<OrderProduct>
@@ -25,4 +25,7 @@ interface OrderProductDao {
 
     @Update
     fun editOrderProduct(orderProduct: OrderProduct)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertOrUpdate(orderProduct: OrderProduct)
 }

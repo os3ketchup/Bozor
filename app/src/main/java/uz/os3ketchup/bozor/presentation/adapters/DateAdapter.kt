@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.recyclerview.widget.RecyclerView
@@ -21,13 +22,10 @@ class DateAdapter(
     RecyclerView.Adapter<DateAdapter.VH>() {
 
     inner class VH(private var itemRV: ItemOrdersBinding) : ViewHolder(itemRV.root) {
-        fun onBind(sumProduct: SumProduct) {
+        fun onBind(sumProduct: SumProduct,position: Int) {
             itemRV.itemTvYear.text = sumProduct.date
             itemRV.root.setOnClickListener {
-
-                navController.navigate(R.id.aboutListFragment)
-
-
+                navController.navigate(R.id.aboutListFragment, bundleOf("date" to position))
             }
         }
     }
@@ -41,6 +39,6 @@ class DateAdapter(
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        holder.onBind(list[position])
+        holder.onBind(list[position],position)
     }
 }

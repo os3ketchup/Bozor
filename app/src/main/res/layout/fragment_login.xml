@@ -70,12 +70,12 @@
                 android:text="+998"
                 android:textSize="36sp"/>
             <EditText
+                android:id="@+id/et_phone_number"
                 android:background="@null"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="36sp"
                 android:hint="901234567"
-
                 android:textCursorDrawable="@drawable/cursor_color"
 
 

@@ -17,7 +17,6 @@ class InfoProductFragment : Fragment() {
 
     lateinit var binding: FragmentInfoProductBinding
     lateinit var myDatabase: MyDatabase
-    private lateinit var productInfo: ProductInfo
     lateinit var infoProductAdapter: InfoProductAdapter
 
     override fun onCreateView(

@@ -1,7 +1,6 @@
 package uz.os3ketchup.bozor.presentation.fragments
 
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -17,7 +16,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
-import androidx.room.util.query
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.apache.poi.wp.usermodel.HeaderFooterType
@@ -33,9 +37,12 @@ import uz.os3ketchup.bozor.presentation.adapters.BazarAdapter
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class BazarListFragment : Fragment() {
@@ -45,6 +52,7 @@ class BazarListFragment : Fragment() {
     private lateinit var myDatabase: MyDatabase
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
+    lateinit var productInfo: ProductInfo
 
 
     override fun onCreateView(
@@ -60,6 +68,41 @@ class BazarListFragment : Fragment() {
     @SuppressLint("CheckResult", "SetTextI18n", "SimpleDateFormat")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        myDatabase = MyDatabase.getInstance(requireActivity())
+        /*FirebaseApp.initializeApp(requireContext())
+        val database = FirebaseDatabase.getInstance()
+        val rootRef = database.reference
+        val orderProductRef = rootRef.child("order_products")
+
+        myDatabase.orderProductDao().getAllOrderProduct().forEach {
+            orderProductRef.child(it.id.toString()).setValue(it)
+        }
+*/
+
+        val database = Firebase.database
+        val myRef = database.getReference("ORDER_PRODUCTS")
+        val list = mutableListOf<OrderProduct>()
+        // Read from the database
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (child in dataSnapshot.children) {
+                    val orderProduct = child.getValue(OrderProduct::class.java)
+                    if (orderProduct != null) {
+                        myDatabase.orderProductDao().insertOrUpdate(orderProduct)
+                    }
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Getting Post failed, log a message
+
+            }
+        }
+        myRef.addValueEventListener(postListener)
+
+
+
 
         navHostFragment =
             requireActivity().supportFragmentManager.findFragmentById(R.id.container_main) as NavHostFragment
@@ -69,7 +112,7 @@ class BazarListFragment : Fragment() {
         var totalPrice = 0.0
         var imageResource = 0
 
-        myDatabase = MyDatabase.getInstance(requireActivity())
+
         binding.svProducts.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -81,12 +124,12 @@ class BazarListFragment : Fragment() {
                 return true
             }
         })
-/*
-        val currentDate = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-        val formattedDateTime = currentDate.format(formatter)!!
-        val orderProduct = myDatabase.orderProductDao().getAllOrderProduct()
-*/
+        /*
+                val currentDate = LocalDate.now()
+                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                val formattedDateTime = currentDate.format(formatter)!!
+                val orderProduct = myDatabase.orderProductDao().getAllOrderProduct()
+        */
         val currentTime = Date()
 
 // Format the time as a string
@@ -94,7 +137,7 @@ class BazarListFragment : Fragment() {
         val formattedTime = formatter.format(currentTime)
 
         binding.ivConfirm.setOnClickListener {
-            myDatabase.orderProductDao().getAllOrderProduct().forEach { it ->
+            myDatabase.orderProductDao().getAllOrderProduct().forEach {
 
                 myDatabase.productDao().getAllProducts().forEach { product ->
                     if (it.product == product.productName) {
@@ -107,19 +150,26 @@ class BazarListFragment : Fragment() {
                 productList = myDatabase.orderProductDao().getAllOrderProduct()
             )
             myDatabase.sumProductDao().addSumProducts(sumProduct)
-
+            myDatabase.productInfoDao().clearTable()
             myDatabase.sumProductDao().getAllSumProducts().forEach {
                 it.productList.forEach { requiredProduct ->
-
-                    val productInfo = ProductInfo(
+                    productInfo = ProductInfo(
                         productName = requiredProduct.product,
                         productPrice = requiredProduct.price,
                         productAmount = requiredProduct.amount,
-                        priceDate = it.date
+                        priceDate = it.date,
+                        productChanging = 404
                     )
+
                     myDatabase.productInfoDao().addProductInfo(productInfo)
                 }
+
             }
+
+            myDatabase.orderProductDao().getAllOrderProduct().forEach {
+                myDatabase.orderProductDao().editOrderProduct(it.copy(isLongClicked = false))
+            }
+
         }
 
         binding.fabAddProduct.setOnClickListener {
@@ -128,7 +178,7 @@ class BazarListFragment : Fragment() {
 
         binding.ivShare.setOnClickListener {
             val targetDoc = createWordDoc()
-            addParagraph(targetDoc)
+            /*addParagraph(targetDoc)*/
             addTable(targetDoc)
             addHeaderAndFooter(targetDoc, totalPrice)
             saveOurDoc(targetDoc)
@@ -153,7 +203,9 @@ class BazarListFragment : Fragment() {
                         totalPrice += it.sum
                     }
                 }
-                binding.tvTotalPrice.text = "Total price: $totalPrice"
+                val formatters = NumberFormat.getCurrencyInstance(Locale.US)
+                val formattedAmount = formatters.format(totalPrice)
+                binding.tvTotalPrice.text = "Total price: $formattedAmount"
 
                 bazarAdapter = BazarAdapter(requireContext(), orderList, navController)
                 binding.rvProducts.adapter = bazarAdapter
@@ -174,6 +226,7 @@ class BazarListFragment : Fragment() {
                     myDatabase.orderProductDao().getAllOrderProduct().forEach {
                         if (it.isChecked) {
                             myDatabase.orderProductDao().deleteOrderProduct(it)
+                            myRef.child(it.id.toString()).removeValue()
                         }
                     }
                 }
@@ -184,7 +237,6 @@ class BazarListFragment : Fragment() {
                     binding.bottomLayout.visibility = View.VISIBLE
                     binding.ivAll.setImageResource(R.drawable.ic_all)
                     imageResource = R.drawable.ic_all
-
                 } else {
                     binding.ivClear.visibility = View.INVISIBLE
                     binding.fabAddProduct.visibility = View.VISIBLE
@@ -193,8 +245,6 @@ class BazarListFragment : Fragment() {
                     binding.ivAll.setImageResource(R.drawable.ic_calendar)
                     imageResource = R.drawable.ic_calendar
                 }
-
-
             }
 
         binding.ivClear.setOnClickListener {
@@ -223,13 +273,17 @@ class BazarListFragment : Fragment() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun saveOurDoc(targetDoc: XWPFDocument): Uri {
         val ourAppFileDirectory = File(requireActivity().filesDir, "files")
+        val currentDateTime = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formatted = currentDateTime.format(formatter)
 
         if (!ourAppFileDirectory.exists()) {
             ourAppFileDirectory.mkdirs()
         }
-        val wordFile = File(ourAppFileDirectory, "ostatki.docx")
+        val wordFile = File(ourAppFileDirectory, "bozorlik_$formatted.docx")
         var contentUri: Uri? = null
         try {
             val fileOut = FileOutputStream(wordFile)
@@ -249,16 +303,27 @@ class BazarListFragment : Fragment() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun addHeaderAndFooter(targetDoc: XWPFDocument, totalPrice: Double) {
+
+        val currentDateTime = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd ")
+        val formatted = currentDateTime.format(formatter)
+
         //initializing the header
         val docHeader = targetDoc.createHeader(HeaderFooterType.DEFAULT)
 
         //creating a run for the header. This is for setting the header text and stylings
         val headerRun = docHeader.createParagraph().createRun()
-        headerRun.setText("This is the header!")
+        headerRun.paragraph.alignment = ParagraphAlignment.CENTER
+
+        headerRun.setText(formatted)
+        headerRun.fontSize = 24
+
+
         headerRun.fontFamily = "Copperplate Gothic"
         headerRun.isBold = true
-        headerRun.color = "00ff00"
+        headerRun.color = "bc4749"
 
         //initializing the footer
         val docFooter = targetDoc.createFooter(HeaderFooterType.DEFAULT)
@@ -267,31 +332,37 @@ class BazarListFragment : Fragment() {
         val footerRun = docFooter.createParagraph().createRun()
         footerRun.fontFamily = "Copperplate Gothic"
         footerRun.isBold = true
-        footerRun.setText("Sum of products: $totalPrice")
+        val numberFormat = DecimalFormat("#,###")
+
+        val formattedNumber = numberFormat.format(totalPrice)
+//formattedNumber is equal to 1,000,000
+
+
+        footerRun.setText("Sum of products: $formattedNumber so'm")
 
     }
 
-/*
-    private fun addTable(targetDoc: XWPFDocument) {
-        val ourTable = targetDoc.createTable()
+    /*
+        private fun addTable(targetDoc: XWPFDocument) {
+            val ourTable = targetDoc.createTable()
 
-        //Creating the first row and adding cell values
-        val row1 = ourTable.getRow(0)
-        row1.getCell(0).text = "Code"
-        row1.addNewTableCell().text = "Item"
+            //Creating the first row and adding cell values
+            val row1 = ourTable.getRow(0)
+            row1.getCell(0).text = "Code"
+            row1.addNewTableCell().text = "Item"
 
-        //Creating the second row
-        val row2 = ourTable.createRow()
-        row2.getCell(0).text = "0345"
-        row2.getCell(1).text = "Benz"
+            //Creating the second row
+            val row2 = ourTable.createRow()
+            row2.getCell(0).text = "0345"
+            row2.getCell(1).text = "Benz"
 
-        //creating the third row
-        val row3 = ourTable.createRow()
-        row3.getCell(0).text = "48542"
-        row3.getCell(1).text = "Eng-Ed"
+            //creating the third row
+            val row3 = ourTable.createRow()
+            row3.getCell(0).text = "48542"
+            row3.getCell(1).text = "Eng-Ed"
 
-    }
-*/
+        }
+    */
 
     private fun createWordDoc(): XWPFDocument {
         return XWPFDocument()
@@ -337,10 +408,13 @@ class BazarListFragment : Fragment() {
         ourTable.getRow(0).getCell(3).paragraphs[0].alignment = ParagraphAlignment.CENTER
         ourTable.getRow(0).getCell(4).paragraphs[0].alignment = ParagraphAlignment.CENTER
         ourTable.getRow(0).getCell(5).paragraphs[0].alignment = ParagraphAlignment.CENTER
+        val numberFormat = DecimalFormat("#,###")
+
 
         for ((inc, i) in myDatabase.orderProductDao().getAllOrderProduct().withIndex()) {
 
             if (i.isChecked) {
+                val formattedNumber = numberFormat.format(i.sum)
                 val newRow = ourTable.createRow()
 
                 newRow.getCell(0).text = (inc + 1).toString()
@@ -348,7 +422,7 @@ class BazarListFragment : Fragment() {
                 newRow.getCell(2).text = i.amount.toString()
                 newRow.getCell(3).text = i.price.toString()
                 newRow.getCell(4).text = i.unit
-                newRow.getCell(5).text = i.sum.toString()
+                newRow.getCell(5).text = formattedNumber
             }
 
 

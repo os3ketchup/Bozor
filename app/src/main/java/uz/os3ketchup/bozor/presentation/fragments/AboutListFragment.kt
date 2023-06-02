@@ -9,6 +9,8 @@ import uz.os3ketchup.bozor.R
 import uz.os3ketchup.bozor.data.database.MyDatabase
 import uz.os3ketchup.bozor.databinding.FragmentAboutListBinding
 import uz.os3ketchup.bozor.presentation.adapters.SummarizeAdapter
+import java.text.NumberFormat
+import java.util.*
 
 
 class AboutListFragment : Fragment() {
@@ -28,11 +30,23 @@ class AboutListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        var totalSum = 0
         myDatabase = MyDatabase.getInstance(requireContext())
         val list = myDatabase.sumProductDao().getAllSumProducts()
+        val position = arguments?.getInt("date")!!
+        binding.tvDateList.text = myDatabase.sumProductDao().getAllSumProducts()[position].date
+        myDatabase.sumProductDao().getAllSumProducts()[position].productList.forEach {
+            totalSum += it.sum.toInt()
+        }
+        val formatters = NumberFormat.getCurrencyInstance(Locale.US)
+        val formattedAmount = formatters.format(totalSum)
 
-        binding.tvDateList.text = myDatabase.sumProductDao().getAllSumProducts()[0].date
-        summarizeAdapter = SummarizeAdapter(requireContext(), list)
+        binding.tvTotalPrice.text = formattedAmount
+        summarizeAdapter = SummarizeAdapter(
+            requireContext(),
+            myDatabase.sumProductDao().getAllSumProducts()[position].productList,
+            position
+        )
         binding.rvSummarizeAdapter.adapter = summarizeAdapter
     }
 

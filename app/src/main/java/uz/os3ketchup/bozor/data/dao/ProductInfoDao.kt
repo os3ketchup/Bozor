@@ -17,4 +17,7 @@ interface ProductInfoDao {
 
     @Query("SELECT * FROM ProductInfo")
     fun getAllProductInfo():List<ProductInfo>
+
+    @Query("DELETE FROM ProductInfo")
+    fun clearTable()
 }

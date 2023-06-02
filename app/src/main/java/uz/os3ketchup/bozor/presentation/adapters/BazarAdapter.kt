@@ -76,7 +76,7 @@ class BazarAdapter(
                     myDatabase.orderProductDao()
                         .editOrderProduct(
                             orderProduct.copy(
-                                amount = amounts, sum = price * amounts
+                                amount = amounts, sum = price * amounts, price = price
                             )
                         )
                     myDatabase.orderProductDao().getAllOrderProduct().forEach {
@@ -87,6 +87,7 @@ class BazarAdapter(
                                 )
                             )
                     }
+
                     myDatabase.orderProductDao()
                         .updateOrderProductPriceByProduct(orderProduct.product, newPrice = price)
 

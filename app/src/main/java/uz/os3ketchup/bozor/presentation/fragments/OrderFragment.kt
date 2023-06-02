@@ -12,6 +12,10 @@ import android.widget.*
 import android.widget.LinearLayout.LayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.firebase.FirebaseApp
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import uz.os3ketchup.bozor.R
@@ -47,10 +51,12 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
     @SuppressLint("CheckResult")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.mainToolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
         myDatabase = MyDatabase.getInstance(requireActivity())
-        var currentPrice = 0.0
-
-
         myDatabase.amountProductDao().getAllAmountProduct().subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread()).subscribe { productList ->
                 amountProductAdapter = AmountProductAdapter(requireContext(), productList)
@@ -59,15 +65,13 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
 
         binding.btnSave.setOnClickListener {
-
-
             if (binding.tvPart.text.toString()
                     .isNotEmpty() && binding.tvNameOfProduct.text.toString()
                     .isNotEmpty() && binding.etAmount.text.toString().isNotEmpty()
             ) {
                 myDatabase.productDao().getAllProducts().forEach {
-                    if (binding.tvNameOfProduct.text.toString()== it.productName){
-                         amountProduct = AmountProduct(
+                    if (binding.tvNameOfProduct.text.toString() == it.productName) {
+                        amountProduct = AmountProduct(
                             productCategory = binding.tvPart.text.toString(),
                             productName = binding.tvNameOfProduct.text.toString(),
                             amountProduct = binding.etAmount.text.toString(),
@@ -76,8 +80,6 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
                         )
                     }
                 }
-
-
                 myDatabase.amountProductDao().addAmountProduct(amountProduct)
                 binding.tvPart.text = ""
                 binding.tvNameOfProduct.text = ""
@@ -132,19 +134,38 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     category = it.productCategory,
                     product = it.productName,
                     unit = it.unitProduct,
-                    sum = (it.priceProduct * it.amountProduct.toInt()),
+                    sum = (it.priceProduct * it.amountProduct.toDouble()),
                     price = it.priceProduct,
                     amount = it.amountProduct.toDouble(),
                     date = ""
                 )
 
                 myDatabase.orderProductDao().addOrderProduct(orderProduct)
+
+                /* FirebaseApp.initializeApp(requireContext())
+                 val database = FirebaseDatabase.getInstance()
+                 val rootRef = database.reference
+
+                 val orderProductRef = rootRef.child("order_products")
+               *//*  orderProductRef.removeValue()*//*
+                myDatabase.orderProductDao().getAllOrderProduct().forEach { orderProducts ->
+                    orderProductRef.child(orderProductRef.push().key!!).setValue(orderProducts)
+                }*/
+
+                val database = Firebase.database
+                val myRef = database.getReference("ORDER_PRODUCTS")
+                                myRef.removeValue()
+                                myDatabase.orderProductDao().getAllOrderProduct().forEach { orderProducts ->
+                                    myRef.child(orderProducts.id.toString()).setValue(orderProducts)
+                                }
+
+
                 myDatabase.amountProductDao().clearTable()
             }
 
 
         }
-/*support_simple_spinner_dropdown_item*/
+        /*support_simple_spinner_dropdown_item*/
         binding.tvPart.setOnClickListener {
             dialog = Dialog(requireContext())
             dialog.setContentView(R.layout.dialog_particular_product)

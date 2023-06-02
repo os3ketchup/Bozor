@@ -7,23 +7,25 @@ import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import uz.os3ketchup.bozor.R
+import uz.os3ketchup.bozor.data.OrderProduct
 import uz.os3ketchup.bozor.data.SumProduct
 import uz.os3ketchup.bozor.databinding.ItemListProductBinding
 import uz.os3ketchup.bozor.databinding.ItemOrdersBinding
 
 class SummarizeAdapter(
     var context: Context,
-    private var list: List<SumProduct>
+    private var list: List<OrderProduct>,var positions: Int
 ) :
     RecyclerView.Adapter<SummarizeAdapter.VH>() {
 
 
 
     inner class VH(private var itemRV: ItemListProductBinding) : ViewHolder(itemRV.root) {
-        fun onBind(sumProduct: SumProduct) {
-            itemRV.tvProductName.text = sumProduct.productList[0].product
-            itemRV.tvAmount.text = sumProduct.productList[0].amount.toString()
-            itemRV.tvSum.text = sumProduct.productList[0].sum.toString()
+        fun onBind(orderProduct: OrderProduct) {
+
+            itemRV.tvProductName.text = orderProduct.product
+            itemRV.tvAmount.text = orderProduct.amount.toString()
+            itemRV.tvSum.text = orderProduct.sum.toString()
 
         }
 
