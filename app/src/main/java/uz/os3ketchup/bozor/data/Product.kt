@@ -20,5 +20,5 @@ data class Product(
     var productName: String = "",
     var productAmount: Double = 0.0,
     val productUnit: String = "",
-    val categoryId: Int
+    val categoryId: Int?  = null
 )

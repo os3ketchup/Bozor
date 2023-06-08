@@ -13,6 +13,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import uz.os3ketchup.bozor.R
 import uz.os3ketchup.bozor.data.Category
 import uz.os3ketchup.bozor.data.database.MyDatabase
@@ -39,6 +41,9 @@ class CategoryAdapter(var context: Context, private var list: List<Category>) :
                 popupMenu.show()
 
                 popupMenu.setOnMenuItemClickListener {
+
+                    val firebaseDatabase = Firebase.database
+                    val databaseRef = firebaseDatabase.getReference("part_products")
                     when (it.itemId) {
                         R.id.item_edit -> {
                             database = MyDatabase.getInstance(context)
@@ -64,6 +69,7 @@ class CategoryAdapter(var context: Context, private var list: List<Category>) :
 
                                 if (editTextName.text.isNotEmpty()) {
                                     database.categoryDao().editCategory(category)
+                                    databaseRef.child(category.categoryId.toString()).setValue(category)
                                     Toast.makeText(context, "saved", Toast.LENGTH_SHORT)
                                         .show()
                                 } else {
@@ -83,6 +89,8 @@ class CategoryAdapter(var context: Context, private var list: List<Category>) :
                         R.id.item_delete -> {
                             database = MyDatabase.getInstance(context)
                             database.categoryDao().deleteCategory(category)
+
+                            databaseRef.child(category.categoryId.toString()).removeValue()
                             true
                         }
                         else -> {

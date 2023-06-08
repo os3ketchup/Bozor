@@ -27,6 +27,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import org.apache.poi.wp.usermodel.HeaderFooterType
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment
 import org.apache.poi.xwpf.usermodel.XWPFDocument
+import uz.os3ketchup.bozor.CONSTANTS.posVar
 import uz.os3ketchup.bozor.R
 import uz.os3ketchup.bozor.data.OrderProduct
 import uz.os3ketchup.bozor.data.ProductInfo
@@ -69,19 +70,10 @@ class BazarListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         myDatabase = MyDatabase.getInstance(requireActivity())
-        /*FirebaseApp.initializeApp(requireContext())
-        val database = FirebaseDatabase.getInstance()
-        val rootRef = database.reference
-        val orderProductRef = rootRef.child("order_products")
 
-        myDatabase.orderProductDao().getAllOrderProduct().forEach {
-            orderProductRef.child(it.id.toString()).setValue(it)
-        }
-*/
 
         val database = Firebase.database
         val myRef = database.getReference("ORDER_PRODUCTS")
-        val list = mutableListOf<OrderProduct>()
         // Read from the database
         val postListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -89,25 +81,21 @@ class BazarListFragment : Fragment() {
                     val orderProduct = child.getValue(OrderProduct::class.java)
                     if (orderProduct != null) {
                         myDatabase.orderProductDao().insertOrUpdate(orderProduct)
+                        //TODO: CODE SAME AS ABOVE IN PART FRAGMENT
+
                     }
                 }
-
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 // Getting Post failed, log a message
-
             }
         }
         myRef.addValueEventListener(postListener)
 
-
-
-
         navHostFragment =
             requireActivity().supportFragmentManager.findFragmentById(R.id.container_main) as NavHostFragment
         navController = navHostFragment.navController
-
 
         var totalPrice = 0.0
         var imageResource = 0
@@ -131,8 +119,7 @@ class BazarListFragment : Fragment() {
                 val orderProduct = myDatabase.orderProductDao().getAllOrderProduct()
         */
         val currentTime = Date()
-
-// Format the time as a string
+        // Format the time as a string
         val formatter = SimpleDateFormat("yyyy, MMMM d")
         val formattedTime = formatter.format(currentTime)
 
@@ -160,7 +147,6 @@ class BazarListFragment : Fragment() {
                         priceDate = it.date,
                         productChanging = 404
                     )
-
                     myDatabase.productInfoDao().addProductInfo(productInfo)
                 }
 
@@ -209,6 +195,7 @@ class BazarListFragment : Fragment() {
 
                 bazarAdapter = BazarAdapter(requireContext(), orderList, navController)
                 binding.rvProducts.adapter = bazarAdapter
+                binding.rvProducts.scrollToPosition(posVar)
 
                 if (imageResource == R.drawable.ic_calendar) {
                     binding.ivAll.setOnClickListener {
@@ -250,6 +237,7 @@ class BazarListFragment : Fragment() {
         binding.ivClear.setOnClickListener {
             myDatabase.orderProductDao().getAllOrderProduct().forEach {
                 myDatabase.orderProductDao().editOrderProduct(it.copy(isLongClicked = false))
+                myRef.child(it.id.toString()).setValue(it.copy(isLongClicked = false))
             }
         }
 
@@ -335,7 +323,7 @@ class BazarListFragment : Fragment() {
         val numberFormat = DecimalFormat("#,###")
 
         val formattedNumber = numberFormat.format(totalPrice)
-//formattedNumber is equal to 1,000,000
+        //formattedNumber is equal to 1,000,000
 
 
         footerRun.setText("Sum of products: $formattedNumber so'm")

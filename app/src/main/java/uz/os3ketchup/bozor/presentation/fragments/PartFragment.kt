@@ -13,6 +13,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.room.Database
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -50,6 +55,25 @@ class PartFragment : Fragment() {
             findNavController().popBackStack()
         }
         myDatabase = MyDatabase.getInstance(requireContext())
+
+        val firebaseDatabase = Firebase.database
+        val firebaseRef = firebaseDatabase.getReference("part_products")
+        val valueEventListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (child in snapshot.children) {
+                    val category = child.getValue(Category::class.java)
+                    if (category != null) {
+                        myDatabase.categoryDao().insertOrUpdate(category)
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        }
+
+        firebaseRef.addValueEventListener(valueEventListener)
         myDatabase.categoryDao().getAllCategories().subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread()).subscribe {
                 categoryAdapter = CategoryAdapter(requireContext(), it)
@@ -77,7 +101,7 @@ class PartFragment : Fragment() {
             btnSave.setOnClickListener {
                 val list = ArrayList<String>()
                 myDatabase.categoryDao().getAllCategory().forEach {
-                    list.add(it.categoryName)
+                    list.add(it.categoryName.toString())
                 }
 
                 if (editTextName.text.isNotEmpty() && !list.contains(
@@ -88,6 +112,12 @@ class PartFragment : Fragment() {
                     category = Category(categoryName = editTextName.text.toString().trim()
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
                     myDatabase.categoryDao().addCategory(category)
+                    val firebaseDatabase = Firebase.database
+                    val databaseRef = firebaseDatabase.getReference("part_products")
+                    databaseRef.removeValue()
+                    myDatabase.categoryDao().getAllCategory().forEach {
+                        databaseRef.child(it.categoryId.toString()).setValue(it)
+                    }
                     Toast.makeText(requireContext(), "saved", Toast.LENGTH_SHORT).show()
                     dialog.cancel()
                 } else {
@@ -95,8 +125,7 @@ class PartFragment : Fragment() {
                         requireContext(),
                         "please fill the gaps or this category is already available",
                         Toast.LENGTH_SHORT
-                    )
-                        .show()
+                    ).show()
                 }
 
 

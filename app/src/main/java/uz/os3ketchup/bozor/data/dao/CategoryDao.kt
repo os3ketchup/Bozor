@@ -34,4 +34,7 @@ interface CategoryDao {
 
     @Update
     fun editCategory(category: Category)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertOrUpdate(category: Category)
 }

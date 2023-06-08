@@ -47,7 +47,7 @@ class ProductAddingFragment : Fragment() {
         val listCategoryName = ArrayList<String>()
 
         listCategory.forEach {
-            listCategoryName.add(it.categoryName)
+            listCategoryName.add(it.categoryName.toString())
         }
 
 

@@ -110,7 +110,7 @@ class OrderFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
 
         listCategory.forEach {
-            listCategoryName.add(it.categoryName)
+            listCategoryName.add(it.categoryName.toString())
         }
 
         binding.addProduct.setOnClickListener {

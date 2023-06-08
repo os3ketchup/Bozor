@@ -5,6 +5,7 @@ import android.app.ActionBar
 import android.app.Dialog
 import android.content.Context
 import android.os.Build
+import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -20,12 +21,19 @@ import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
+import uz.os3ketchup.bozor.CONSTANTS.posVar
 import uz.os3ketchup.bozor.R
 import uz.os3ketchup.bozor.data.*
 import uz.os3ketchup.bozor.data.database.MyDatabase
 import uz.os3ketchup.bozor.databinding.ItemListBinding
+import java.util.Objects
 
 class BazarAdapter(
     var context: Context,
@@ -41,15 +49,21 @@ class BazarAdapter(
     inner class VH(private var itemRV: ItemListBinding) : ViewHolder(itemRV.root) {
 
         @SuppressLint("SetTextI18n", "CheckResult")
-        fun onBind(orderProduct: OrderProduct) {
+        fun onBind(orderProduct: OrderProduct,position: Int) {
 
             itemRV.etPrice.text = orderProduct.price.toString()
             itemRV.tvProductName.text = orderProduct.product
             itemRV.tvAmount.text = "${orderProduct.amount} ${orderProduct.unit}"
             itemRV.checkbox.isChecked = orderProduct.isChecked
+
+            val database = Firebase.database
+            val myRef = database.getReference("ORDER_PRODUCTS")
+
             itemRV.checkbox.setOnCheckedChangeListener { _, isChecked ->
                 orderProduct.isChecked = isChecked
                 myDatabase.orderProductDao().editOrderProduct(orderProduct)
+                myRef.child(orderProduct.id.toString()).setValue(orderProduct)
+                posVar = position
             }
 
 
@@ -70,6 +84,7 @@ class BazarAdapter(
                 labelProduct.text = orderProduct.product
                 priceItem.setText(orderProduct.price.toString())
                 amountItem.setText(orderProduct.amount.toString())
+
                 buttonAccept.setOnClickListener {
                     val amounts = amountItem.text.toString().toDouble()
                     val price = priceItem.text.toString().toDouble()
@@ -89,8 +104,12 @@ class BazarAdapter(
                     }
 
                     myDatabase.orderProductDao()
+
                         .updateOrderProductPriceByProduct(orderProduct.product, newPrice = price)
 
+                    myDatabase.orderProductDao().getAllOrderProduct().forEach {
+                        myRef.child(it.id.toString()).setValue(it)
+                    }
 
 
                     dialog.cancel()
@@ -100,37 +119,7 @@ class BazarAdapter(
 
             }
 
-/*
-            itemRV.etPrice.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
 
-                }
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-
-                }
-
-                override fun afterTextChanged(s: Editable?) {
-                    myDatabase.orderProductDao().updateOrderProductPriceByProduct(
-                        product = orderProduct.product,
-                        newPrice = s.toString().toDouble()
-                    )
-
-                    myDatabase.orderProductDao().getAllOrderProduct().forEach {
-                        myDatabase.orderProductDao()
-                            .editOrderProduct(it.copy(sum = it.amount * it.price))
-                    }
-
-
-                }
-            })
-*/
             itemRV.root.setOnClickListener {
                 navController.navigate(
                     R.id.infoProductFragment,
@@ -142,7 +131,9 @@ class BazarAdapter(
             itemRV.root.setOnLongClickListener {
                 myDatabase.orderProductDao().getAllOrderProduct().forEach {
                     myDatabase.orderProductDao().editOrderProduct(it.copy(isLongClicked = true))
+                    myRef.child(it.id.toString()).setValue(it.copy(isLongClicked = true))
                 }
+                posVar = position
                 true
             }
 
@@ -173,7 +164,7 @@ class BazarAdapter(
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        holder.onBind(list[position])
+        holder.onBind(list[position],position)
     }
 
 
